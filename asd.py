@@ -8,7 +8,7 @@ connection = pypyodbc.connect('Driver={SQL Server};'
 cursor = connection.cursor()
 mySQLQuery = ("""
                 SELECT *
-                FROM Library.Author
+                FROM Library.Readers
                 """)
 cursor.execute(mySQLQuery)
 results = cursor.fetchall()
