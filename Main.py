@@ -3,7 +3,7 @@ from random import randint
 
 import pypyodbc
 import PySide2
-from PySide2 import QtWidgets, QtSql
+from PySide2 import QtWidgets
 from PySide2.QtCore import *
 from PySide2.QtGui import *
 
