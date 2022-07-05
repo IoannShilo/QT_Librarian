@@ -237,12 +237,23 @@ class SearchBooksWindow(QtWidgets.QWidget):
 
         cursor = self.db_conn.cursor()
         mySQLQuery = ("""
-                        SELECT *
-                        FROM Library.Book_copy
+                        SELECT 
+                            Library.Book_copy.Book_copy_id, 
+                            Library.Book.Book_title, 
+                            Library.Book_copy.ISBN, 
+                            Library.Book.Author_id, 
+                            Library.Author.First_name, 
+                            Library.Author.Last_name, 
+                            Library.Author.Country,
+                            Library.Book_copy.Issued_not_issued
+                        FROM Library.Author 
+                        INNER JOIN Library.Book ON Library.Author.Author_id = Library.Book.Author_id CROSS JOIN
+                         Library.Book_copy
                         """)
         cursor.execute(mySQLQuery)
         data_list = cursor.fetchall()
-        header = ['Book ID', 'ISBN', 'issued_not_issued']
+        header = ['Book ID', 'Book title', 'ISBN', 'Author ID',
+                  'Author first name', 'Author last name', 'Country', 'issued_not_issued']
 
         table_model = MyTableModel(self, data_list, header)
         self.ui.tableView.setModel(table_model)
