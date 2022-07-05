@@ -17,22 +17,18 @@ class Ui_Form(object):
     def setupUi(self, Form):
         if not Form.objectName():
             Form.setObjectName(u"Form")
-        Form.resize(1090, 730)
-        sizePolicy = QSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+        Form.resize(1013, 746)
+        sizePolicy = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(Form.sizePolicy().hasHeightForWidth())
         Form.setSizePolicy(sizePolicy)
-        Form.setMinimumSize(QSize(1090, 730))
-        Form.setMaximumSize(QSize(1090, 730))
-        self.verticalLayout_3 = QVBoxLayout(Form)
-        self.verticalLayout_3.setObjectName(u"verticalLayout_3")
-        self.verticalLayout_2 = QVBoxLayout()
+        self.verticalLayout_2 = QVBoxLayout(Form)
         self.verticalLayout_2.setObjectName(u"verticalLayout_2")
-        self.verticalLayout_2.setContentsMargins(-1, -1, -1, 0)
+        self.verticalLayout = QVBoxLayout()
+        self.verticalLayout.setObjectName(u"verticalLayout")
         self.horizontalLayout = QHBoxLayout()
         self.horizontalLayout.setObjectName(u"horizontalLayout")
-        self.horizontalLayout.setContentsMargins(4, -1, 28, 10)
         self.label = QLabel(Form)
         self.label.setObjectName(u"label")
         self.label.setMinimumSize(QSize(50, 0))
@@ -47,49 +43,21 @@ class Ui_Form(object):
 
         self.horizontalLayout.addWidget(self.lineEdit)
 
+        self.pushButton = QPushButton(Form)
+        self.pushButton.setObjectName(u"pushButton")
 
-        self.verticalLayout_2.addLayout(self.horizontalLayout)
+        self.horizontalLayout.addWidget(self.pushButton)
 
-        self.verticalLayout = QVBoxLayout()
-        self.verticalLayout.setObjectName(u"verticalLayout")
-        self.horizontalLayout_3 = QHBoxLayout()
-        self.horizontalLayout_3.setObjectName(u"horizontalLayout_3")
+
+        self.verticalLayout.addLayout(self.horizontalLayout)
+
         self.tableView = QTableView(Form)
         self.tableView.setObjectName(u"tableView")
 
-        self.horizontalLayout_3.addWidget(self.tableView)
-
-        self.verticalScrollBar = QScrollBar(Form)
-        self.verticalScrollBar.setObjectName(u"verticalScrollBar")
-        self.verticalScrollBar.setMinimumSize(QSize(20, 0))
-        self.verticalScrollBar.setOrientation(Qt.Vertical)
-
-        self.horizontalLayout_3.addWidget(self.verticalScrollBar)
-
-
-        self.verticalLayout.addLayout(self.horizontalLayout_3)
-
-        self.horizontalLayout_2 = QHBoxLayout()
-        self.horizontalLayout_2.setObjectName(u"horizontalLayout_2")
-        self.horizontalScrollBar = QScrollBar(Form)
-        self.horizontalScrollBar.setObjectName(u"horizontalScrollBar")
-        self.horizontalScrollBar.setMinimumSize(QSize(0, 20))
-        self.horizontalScrollBar.setOrientation(Qt.Horizontal)
-
-        self.horizontalLayout_2.addWidget(self.horizontalScrollBar)
-
-        self.horizontalSpacer = QSpacerItem(26, 20, QSizePolicy.Fixed, QSizePolicy.Minimum)
-
-        self.horizontalLayout_2.addItem(self.horizontalSpacer)
-
-
-        self.verticalLayout.addLayout(self.horizontalLayout_2)
+        self.verticalLayout.addWidget(self.tableView)
 
 
         self.verticalLayout_2.addLayout(self.verticalLayout)
-
-
-        self.verticalLayout_3.addLayout(self.verticalLayout_2)
 
 
         self.retranslateUi(Form)
@@ -100,5 +68,6 @@ class Ui_Form(object):
     def retranslateUi(self, Form):
         Form.setWindowTitle(QCoreApplication.translate("Form", u"Form", None))
         self.label.setText(QCoreApplication.translate("Form", u"Search:", None))
+        self.pushButton.setText(QCoreApplication.translate("Form", u"Search", None))
     # retranslateUi
 

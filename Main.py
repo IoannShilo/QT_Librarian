@@ -12,6 +12,7 @@ from Forms.Register import Ui_Form as RegForm
 from Forms.Readers import Ui_Form as ReadersForm
 from Forms.Young_readers import Ui_Form as YoungReadersForm
 from Forms.Login import Ui_Form as LoginForm
+from Forms.Search_books import Ui_Form as SearchBooksForm
 
 dirname = os.path.dirname(PySide2.__file__)
 plugin_path = os.path.join(dirname, 'plugins', 'platforms')
@@ -29,7 +30,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.db_conn = None
 
         self.loginwin = LoginWindow()
-        self.loginwin.signalConnection.connect(self.setConnection)
+        self.loginwin.signalConnection.connect(self.set_connection)
         self.loginwin.signalConnectionError.connect(self.errorConnection)
 
         self.timer = QTimer(self)
@@ -40,14 +41,21 @@ class MainWindow(QtWidgets.QMainWindow):
         self.ui.pushButton_3.clicked.connect(self.open_register)
         self.ui.pushButton.clicked.connect(self.open_readers)
         self.ui.pushButton_2.clicked.connect(self.open_yng_readers)
+        self.ui.pushButton_4.clicked.connect(self.open_search_books)
+
         self.connect(self.ui.actionLog_in, SIGNAL('triggered()'), self.open_login)
+        self.connect(self.ui.actionLog_out, SIGNAL('triggered()'), self.disable_connection)
 
-    def setConnection(self, emit_conn):
+    def set_connection(self, emit_conn):
         self.db_conn = emit_conn
-        QtWidgets.QMessageBox.about(self, "Successfully", "Connected")
+        QtWidgets.QMessageBox.about(self, "OK", "Connected")
 
-    def errorConnection(self, err):
-        QtWidgets.QMessageBox.warning(self, "Error", str(err))
+    def disable_connection(self):
+        self.db_conn = None
+        QtWidgets.QMessageBox.about(self, "OK", "disconnected")
+
+    def errorConnection(self):
+        QtWidgets.QMessageBox.warning(self, "Error", "Incorrect username or password")
 
     def showtime(self):
         time = QTime.currentTime()
@@ -58,8 +66,8 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def open_register(self):
         if self.db_conn is None:
-            self.errorConnection("Please log in")
-            # Нет подключения
+            QtWidgets.QMessageBox.warning(self, "Error", "Please login")
+
         else:
             self.regwin = RegisterWindow(self.db_conn)
             self.regwin.show()
@@ -67,22 +75,31 @@ class MainWindow(QtWidgets.QMainWindow):
     def open_readers(self):
 
         if self.db_conn is None:
-            self.errorConnection("Please log in")
-            # Нет подключения
+            QtWidgets.QMessageBox.warning(self, "Error", "Please login")
+
         else:
             self.readerswin = ReadersWindow(self.db_conn)
             self.readerswin.show()
 
     def open_yng_readers(self):
         if self.db_conn is None:
-            self.errorConnection("Please log in")
-            # Нет подключения
+            QtWidgets.QMessageBox.warning(self, "Error", "Please login")
+
         else:
             self.youngreaderswin = YoungReadersWindow(self.db_conn)
             self.youngreaderswin.show()
 
     def open_login(self):
         self.loginwin.show()
+
+    def open_search_books(self):
+        if self.db_conn is None:
+            QtWidgets.QMessageBox.warning(self, "Error", "Please login")
+
+        else:
+            self.searchwin = SearchBooksWindow(self.db_conn)
+            self.searchwin.show()
+
 
 
 class RegisterWindow(QtWidgets.QWidget):
@@ -160,7 +177,6 @@ class ReadersWindow(QtWidgets.QWidget):
 class YoungReadersWindow(QtWidgets.QWidget):
     def __init__(self, db_conn, parent=None):
         super().__init__(parent)
-
         self.ui = YoungReadersForm()
         self.ui.setupUi(self)
 
@@ -168,14 +184,13 @@ class YoungReadersWindow(QtWidgets.QWidget):
 
         cursor = self.db_conn.cursor()
         mySQLQuery = ("""
-                               SELECT *
-                               FROM Library.Young_readers
-                               """)
+                        SELECT *
+                        FROM Library.Young_readers
+                        """)
         cursor.execute(mySQLQuery)
         data_list = cursor.fetchall()
         header = ['Reader ID', 'Last name', 'First name',
                   'Middle name', 'Birth card ID', 'Date of Birth card ID', 'Parent ID']
-        print(data_list)
 
         table_model = MyTableModel(self, data_list, header)
         self.ui.tableView.setModel(table_model)
@@ -187,7 +202,6 @@ class LoginWindow(QtWidgets.QWidget):
 
     def __init__(self, parent=None):
         super().__init__(parent)
-
         self.ui = LoginForm()
         self.ui.setupUi(self)
 
@@ -211,6 +225,27 @@ class LoginWindow(QtWidgets.QWidget):
             self.signalConnectionError.emit(err)
 
         self.close()
+
+
+class SearchBooksWindow(QtWidgets.QWidget):
+    def __init__(self, db_conn, parent=None):
+        super().__init__(parent)
+        self.ui = SearchBooksForm()
+        self.ui.setupUi(self)
+
+        self.db_conn = db_conn
+
+        cursor = self.db_conn.cursor()
+        mySQLQuery = ("""
+                        SELECT *
+                        FROM Library.Book_copy
+                        """)
+        cursor.execute(mySQLQuery)
+        data_list = cursor.fetchall()
+        header = ['Book ID', 'ISBN', 'issued_not_issued']
+
+        table_model = MyTableModel(self, data_list, header)
+        self.ui.tableView.setModel(table_model)
 
 
 class MyTableModel(QAbstractTableModel):
