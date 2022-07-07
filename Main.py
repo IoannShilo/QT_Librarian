@@ -13,6 +13,8 @@ from Forms.Readers import Ui_Form as ReadersForm
 from Forms.Young_readers import Ui_Form as YoungReadersForm
 from Forms.Login import Ui_Form as LoginForm
 from Forms.Search_books import Ui_Form as SearchBooksForm
+from Forms.Lending import Ui_Form as LendForm
+from Forms.Booking import Ui_Form as BookingForm
 
 dirname = os.path.dirname(PySide2.__file__)
 plugin_path = os.path.join(dirname, 'plugins', 'platforms')
@@ -38,10 +40,12 @@ class MainWindow(QtWidgets.QMainWindow):
         self.timer.start(1000)
         self.showtime()
 
-        self.ui.pushButton_3.clicked.connect(self.open_register)
         self.ui.pushButton.clicked.connect(self.open_readers)
+        self.ui.pushButton_3.clicked.connect(self.open_register)
         self.ui.pushButton_2.clicked.connect(self.open_yng_readers)
         self.ui.pushButton_4.clicked.connect(self.open_search_books)
+        self.ui.pushButton_5.clicked.connect(self.open_lending_books)
+        self.ui.pushButton_6.clicked.connect(self.open_booking)
 
         self.connect(self.ui.actionLog_in, SIGNAL('triggered()'), self.open_login)
         self.connect(self.ui.actionLog_out, SIGNAL('triggered()'), self.disable_connection)
@@ -100,6 +104,70 @@ class MainWindow(QtWidgets.QMainWindow):
             self.searchwin = SearchBooksWindow(self.db_conn)
             self.searchwin.show()
 
+    def open_lending_books(self):
+        if self.db_conn is None:
+            QtWidgets.QMessageBox.warning(self, "Error", "Please login")
+
+        else:
+            self.lendwin = LendingWindow(self.db_conn)
+            self.lendwin.show()
+
+    def open_booking(self):
+        if self.db_conn is None:
+            QtWidgets.QMessageBox.warning(self, "Error", "Please login")
+
+        else:
+            self.bookingwin = BookingWindow(self.db_conn)
+            self.bookingwin.show()
+
+
+class LendingWindow(QtWidgets.QWidget):
+    def __init__(self, db_conn, parent=None):
+        super().__init__(parent)
+
+        self.ui = LendForm()
+        self.ui.setupUi(self)
+        self.ui.tabWidget.setCurrentIndex(0)
+
+        self.db_conn = db_conn
+        self.cursor = self.db_conn.cursor()
+
+        self.ui.pushButton.clicked.connect(self.lending)
+
+    def lending(self):
+        mySQLQuery = ("""INSERT INTO Library.Lending_of_Books (Book_id, Reader_id, young_reader_id, 
+        Date_of_issue, Expected_return_date) 
+
+                            VALUES (N'%s', N'%s', NULL, N'%s', N'%s')""" % (self.ui.lineEdit_3.text(),
+                                                                            self.ui.lineEdit_2.text(),
+                                                                            self.ui.lineEdit.text(),
+                                                                            self.ui.lineEdit_4.text(),
+                                                                            ))
+
+        self.cursor.execute(mySQLQuery)
+        self.db_conn.commit()
+
+
+class BookingWindow(QtWidgets.QWidget):
+    def __init__(self, db_conn, parent=None):
+        super().__init__(parent)
+
+        self.ui = BookingForm()
+        self.ui.setupUi(self)
+        self.db_conn = db_conn
+        self.cursor = self.db_conn.cursor()
+        self.ui.pushButton.clicked.connect(self.booking)
+
+    def booking(self):
+        mySQLQuery = ("""INSERT INTO Library.Booking (Book_id, Reader_id, young_reader_id, People_in_queue) 
+
+                            VALUES (N'%s', N'%s', NULL, N'%s')""" % (self.ui.lineEdit_2.text(),
+                                                                     self.ui.lineEdit.text(),
+                                                                     '1'
+                                                                     ))
+
+        self.cursor.execute(mySQLQuery)
+        self.db_conn.commit()
 
 
 class RegisterWindow(QtWidgets.QWidget):
@@ -108,18 +176,16 @@ class RegisterWindow(QtWidgets.QWidget):
 
         self.ui = RegForm()
         self.ui.setupUi(self)
-
         self.ui.tabWidget.setCurrentIndex(0)
 
         self.db_conn = db_conn
-
         self.cursor = self.db_conn.cursor()
 
         self.ui.pushButton.clicked.connect(self.reg)
         self.ui.pushButton_3.clicked.connect(self.yng_reg)
 
     def reg(self):
-            mySQLQuery = ("""INSERT INTO Library.Readers (Reader_id, Last_name,
+        mySQLQuery = ("""INSERT INTO Library.Readers (Reader_id, Last_name,
                                                           First_name, Middle_name,
                                                           Address, Phone_number, Passport_id) 
                                                       
@@ -132,8 +198,8 @@ class RegisterWindow(QtWidgets.QWidget):
                                                                                            self.ui.lineEdit_6.text(),
                                                                                            ))
 
-            self.cursor.execute(mySQLQuery)
-            self.db_conn.commit()
+        self.cursor.execute(mySQLQuery)
+        self.db_conn.commit()
 
     def yng_reg(self):
         mySQLQuery = ("""INSERT INTO Library.Young_readers (reader_id, Last_name,
