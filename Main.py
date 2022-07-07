@@ -55,8 +55,11 @@ class MainWindow(QtWidgets.QMainWindow):
         QtWidgets.QMessageBox.about(self, "OK", "Connected")
 
     def disable_connection(self):
-        self.db_conn = None
-        QtWidgets.QMessageBox.about(self, "OK", "disconnected")
+        if self.db_conn is not None:
+            self.db_conn = None
+            QtWidgets.QMessageBox.about(self, "OK", "disconnected")
+        else:
+            QtWidgets.QMessageBox.warning(self, "Error", "Already disconnected")
 
     def errorConnection(self):
         QtWidgets.QMessageBox.warning(self, "Error", "Incorrect username or password")
@@ -135,17 +138,28 @@ class LendingWindow(QtWidgets.QWidget):
         self.ui.pushButton.clicked.connect(self.lending)
 
     def lending(self):
-        mySQLQuery = ("""INSERT INTO Library.Lending_of_Books (Book_id, Reader_id, young_reader_id, 
-        Date_of_issue, Expected_return_date) 
+        try:
+            mySQLQuery = ("""INSERT INTO Library.Lending_of_Books (Book_id, Reader_id, young_reader_id, 
+            Date_of_issue, Expected_return_date) 
+    
+                                VALUES (N'%s', N'%s', NULL, N'%s', N'%s')""" % (self.ui.lineEdit_3.text(),
+                                                                                self.ui.lineEdit_2.text(),
+                                                                                self.ui.lineEdit.text(),
+                                                                                self.ui.lineEdit_4.text(),
+                                                                                ))
 
-                            VALUES (N'%s', N'%s', NULL, N'%s', N'%s')""" % (self.ui.lineEdit_3.text(),
-                                                                            self.ui.lineEdit_2.text(),
-                                                                            self.ui.lineEdit.text(),
-                                                                            self.ui.lineEdit_4.text(),
-                                                                            ))
+            issued_change = ("""UPDATE Library.Book_copy SET Issued_not_issued = N'Выдан'
+                                
+                                WHERE Book_copy_id ='%s' """ % (self.ui.lineEdit_3.text()))
 
-        self.cursor.execute(mySQLQuery)
-        self.db_conn.commit()
+            self.cursor.execute(mySQLQuery)
+            self.cursor.execute(issued_change)
+            self.db_conn.commit()
+            QtWidgets.QMessageBox.about(self, 'OK', 'Note has been added')
+            self.close()
+
+        except pypyodbc.IntegrityError:
+            QtWidgets.QMessageBox.warning(self, 'Error', 'Incorrect data')
 
 
 class BookingWindow(QtWidgets.QWidget):
@@ -159,15 +173,21 @@ class BookingWindow(QtWidgets.QWidget):
         self.ui.pushButton.clicked.connect(self.booking)
 
     def booking(self):
-        mySQLQuery = ("""INSERT INTO Library.Booking (Book_id, Reader_id, young_reader_id, People_in_queue) 
+        try:
+            mySQLQuery = ("""INSERT INTO Library.Booking (Book_id, Reader_id, young_reader_id, People_in_queue) 
+    
+                                VALUES (N'%s', N'%s', NULL, N'%s')""" % (self.ui.lineEdit_2.text(),
+                                                                         self.ui.lineEdit.text(),
+                                                                         '1'
+                                                                         ))
 
-                            VALUES (N'%s', N'%s', NULL, N'%s')""" % (self.ui.lineEdit_2.text(),
-                                                                     self.ui.lineEdit.text(),
-                                                                     '1'
-                                                                     ))
+            self.cursor.execute(mySQLQuery)
+            self.db_conn.commit()
+            QtWidgets.QMessageBox.about(self, 'OK', 'Note has been added')
+            self.close()
 
-        self.cursor.execute(mySQLQuery)
-        self.db_conn.commit()
+        except pypyodbc.IntegrityError:
+            QtWidgets.QMessageBox.warning(self, 'Error', 'Incorrect data')
 
 
 class RegisterWindow(QtWidgets.QWidget):
@@ -185,10 +205,11 @@ class RegisterWindow(QtWidgets.QWidget):
         self.ui.pushButton_3.clicked.connect(self.yng_reg)
 
     def reg(self):
-        mySQLQuery = ("""INSERT INTO Library.Readers (Reader_id, Last_name,
-                                                          First_name, Middle_name,
-                                                          Address, Phone_number, Passport_id) 
-                                                      
+        try:
+            mySQLQuery = ("""INSERT INTO Library.Readers (Reader_id, Last_name,
+                                                              First_name, Middle_name,
+                                                              Address, Phone_number, Passport_id) 
+                                                          
                             VALUES (N'%s', N'%s', N'%s', N'%s', N'%s', N'%s', N'%s')""" % (randint(000000, 999999),
                                                                                            self.ui.lineEdit.text(),
                                                                                            self.ui.lineEdit_2.text(),
@@ -198,25 +219,36 @@ class RegisterWindow(QtWidgets.QWidget):
                                                                                            self.ui.lineEdit_6.text(),
                                                                                            ))
 
-        self.cursor.execute(mySQLQuery)
-        self.db_conn.commit()
+            self.cursor.execute(mySQLQuery)
+            self.db_conn.commit()
+            QtWidgets.QMessageBox.about(self, 'OK', 'New reader has been added')
+            self.close()
+
+        except pypyodbc.IntegrityError:
+            QtWidgets.QMessageBox.warning(self, 'Error', 'Incorrect data')
 
     def yng_reg(self):
-        mySQLQuery = ("""INSERT INTO Library.Young_readers (reader_id, Last_name,
-                                                      First_name, Middle_name,
-                                                      birth_id, date_birth_id, parent_id) 
-
+        try:
+            mySQLQuery = ("""INSERT INTO Library.Young_readers (reader_id, Last_name,
+                                                          First_name, Middle_name,
+                                                          birth_id, date_birth_id, parent_id) 
+    
                             VALUES (N'%s', N'%s', N'%s', N'%s', N'%s', N'%s', N'%s')""" % (randint(000000, 999999),
-                                                                                           self.ui.lineEdit_13.text(),
-                                                                                           self.ui.lineEdit_14.text(),
-                                                                                           self.ui.lineEdit_15.text(),
-                                                                                           self.ui.lineEdit_16.text(),
-                                                                                           self.ui.lineEdit_17.text(),
-                                                                                           self.ui.lineEdit_18.text(),
-                                                                                           ))
+                                                                                            self.ui.lineEdit_13.text(),
+                                                                                            self.ui.lineEdit_14.text(),
+                                                                                            self.ui.lineEdit_15.text(),
+                                                                                            self.ui.lineEdit_16.text(),
+                                                                                            self.ui.lineEdit_17.text(),
+                                                                                            self.ui.lineEdit_18.text(),
+                                                                                            ))
 
-        self.cursor.execute(mySQLQuery)
-        self.db_conn.commit()
+            self.cursor.execute(mySQLQuery)
+            self.db_conn.commit()
+            QtWidgets.QMessageBox.about(self, 'OK', 'New reader has been added')
+            self.close()
+
+        except pypyodbc.IntegrityError:
+            QtWidgets.QMessageBox.warning(self, 'Error', 'Incorrect data')
 
 
 class ReadersWindow(QtWidgets.QWidget):
